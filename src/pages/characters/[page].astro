@@ -1,5 +1,7 @@
 ---
 import type { GetStaticPaths } from 'astro'
+import { Picture } from '@astrojs/image/components'
+
 import Layout from '../../layouts/Layout.astro'
 
 type GetCharactersResponse = {
@@ -54,13 +56,24 @@ const characters = data.results
 ---
 
 <Layout title="Attack on Titan">
-  <h1>Page {page}</h1>
-  <ul>
+  <!-- <h1>Page {page}</h1> -->
+  <ul class="grid grid-cols-3 gap-10">
     {
       characters.map((character) => (
-        <li>
-          {character.name}
-          <div>{character.gender}</div>
+        <li class="bg-gray-700 flex flex-col items-center font-mono text-white p-10 rounded-lg gap-3">
+          <p>{character.name}</p>
+          <p>{character.gender}</p>
+          <div class="w-[10rem]">
+            {character.img && (
+              <Picture
+                src={character.img}
+                widths={[350]}
+                alt={character.name}
+                aspectRatio={'1:1'}
+                class={'rounded-lg'}
+              />
+            )}
+          </div>
         </li>
       ))
     }
