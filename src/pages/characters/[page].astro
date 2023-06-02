@@ -1,8 +1,12 @@
 ---
 import type { GetStaticPaths } from 'astro'
-import { Picture } from '@astrojs/image/components'
+import { Image } from '@astrojs/image/components'
 
 import Layout from '../../layouts/Layout.astro'
+
+type Props = {
+  totalPage: number
+}
 
 type GetCharactersResponse = {
   info: {
@@ -43,10 +47,12 @@ export const getStaticPaths = (async () => {
   const data = (await response.json()) as GetCharactersResponse
   return [...new Array(data.info.pages)].map((_, ind) => ({
     params: { page: (ind + 1).toString() },
+    props: { totalPage: data.info.pages },
   }))
 }) satisfies GetStaticPaths
 
 const { page } = Astro.params
+const { totalPage } = Astro.props
 
 const response = await fetch(
   'https://api.attackontitanapi.com/characters?page=' + page
@@ -56,26 +62,48 @@ const characters = data.results
 ---
 
 <Layout title="Attack on Titan">
-  <!-- <h1>Page {page}</h1> -->
-  <ul class="grid grid-cols-3 gap-10">
-    {
-      characters.map((character) => (
-        <li class="bg-gray-700 flex flex-col items-center font-mono text-white p-10 rounded-lg gap-3">
-          <p>{character.name}</p>
-          <p>{character.gender}</p>
-          <div class="w-[10rem]">
-            {character.img && (
-              <Picture
-                src={character.img}
-                widths={[350]}
-                alt={character.name}
-                aspectRatio={'1:1'}
-                class={'rounded-lg'}
-              />
-            )}
-          </div>
-        </li>
-      ))
-    }
-  </ul>
+  <main
+    class="p-20 flex flex-col gap-10 bg-gradient-to-r from-violet-100 to-fuchsia-100 relative min-h-screen"
+  >
+    <h1 class="text-center text-[3rem] font-mono">Character Page {page}</h1>
+    <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+      {
+        characters.map((character) => (
+          <li class="bg-gradient-to-r from-purple-500 to-pink-500 flex flex-col items-center font-mono text-white p-10 rounded-lg gap-3 shadow-lg text-center">
+            <div class="w-[10rem]">
+              {character.img && (
+                <Image
+                  src={character.img}
+                  width={350}
+                  height={350}
+                  alt={character.name}
+                  aspectRatio={'1:1'}
+                  class={'rounded-lg'}
+                />
+              )}
+            </div>
+            <p>{character.name}</p>
+            <p>{character.gender}</p>
+          </li>
+        ))
+      }
+    </ul>
+    <a
+      href={page === '1' ? '/characters/1' : `/characters/${+(page || 2) - 1}`}
+      class={`fixed top-[50vh] left-3 font-mono p-2 ${
+        page === '1' ? 'hidden' : ''
+      }`}>Prev</a
+    >
+    <a
+      href={page === totalPage.toString()
+        ? `/characters/${totalPage}`
+        : `/characters/${+(page || 0) + 1}`}
+      class=`fixed top-[50vh] right-3 font-mono p-2
+      ${
+        page === totalPage.toString() ? 'hidden' : ''
+      }
+      `
+      >Next</a
+    >
+  </main>
 </Layout>
