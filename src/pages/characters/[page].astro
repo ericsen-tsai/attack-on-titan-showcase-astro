@@ -1,71 +1,71 @@
 ---
-import type { GetStaticPaths } from 'astro'
-import { Image } from '@astrojs/image/components'
+import type { GetStaticPaths } from "astro";
+import { Image } from "@astrojs/image/components";
 
-import Layout from '../../layouts/Layout.astro'
+import Layout from "../../layouts/Layout.astro";
 
 type Props = {
-  totalPage: number
-}
+  totalPage: number;
+};
 
 type GetCharactersResponse = {
   info: {
-    count: number
-    pages: number
-    next_page: null | string
-    prev_page: null | string
-  }
+    count: number;
+    pages: number;
+    next_page: null | string;
+    prev_page: null | string;
+  };
   results: {
-    id: number
-    name: string
-    img: string
-    age: number
-    height: string
-    alias: string[]
-    current_inheritor: string
-    species: string[]
-    gender: string
+    id: number;
+    name: string;
+    img: string;
+    age: number;
+    height: string;
+    alias: string[];
+    current_inheritor: string;
+    species: string[];
+    gender: string;
     relatives: {
-      family: string
-      members: string[]
-    }[]
-    birthplace: string
-    residence: string
-    status: 'alive' | 'alive'
-    occupation: string
+      family: string;
+      members: string[];
+    }[];
+    birthplace: string;
+    residence: string;
+    status: "alive" | "alive";
+    occupation: string;
     groups: {
-      name: string
-      sub_groups: string[]
-    }[]
-    roles: string[]
-    episodes: string[]
-  }[]
-}
+      name: string;
+      sub_groups: string[];
+    }[];
+    roles: string[];
+    episodes: string[];
+  }[];
+};
 
 export const getStaticPaths = (async () => {
-  const response = await fetch('https://api.attackontitanapi.com/characters')
-  const data = (await response.json()) as GetCharactersResponse
+  const response = await fetch("https://api.attackontitanapi.com/characters");
+  const data = (await response.json()) as GetCharactersResponse;
   return [...new Array(data.info.pages)].map((_, ind) => ({
     params: { page: (ind + 1).toString() },
     props: { totalPage: data.info.pages },
-  }))
-}) satisfies GetStaticPaths
+  }));
+}) satisfies GetStaticPaths;
 
-const { page } = Astro.params
-const { totalPage } = Astro.props
+const { page: p } = Astro.params;
+const { totalPage } = Astro.props;
 
 const response = await fetch(
-  'https://api.attackontitanapi.com/characters?page=' + page
-)
-const data = (await response.json()) as GetCharactersResponse
-const characters = data.results
+  "https://api.attackontitanapi.com/characters?page=" + p
+);
+const data = (await response.json()) as GetCharactersResponse;
+const characters = data.results;
 ---
 
 <Layout title="Welcome to Astro.">
   <main
     class="p-20 flex flex-col gap-10 bg-gradient-to-r from-violet-100 to-fuchsia-100 relative min-h-screen"
   >
-    <h1 class="text-center text-[3rem] font-mono">Character Page {page}</h1>
+    <h1 class="text-center text-[3rem] font-mono">Character Page {p}</h1>
     <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
       {
         characters.map((character) => (
@@ -77,8 +77,9 @@ const characters = data.results
                   width={350}
                   height={350}
                   alt={character.name}
-                  aspectRatio={'1:1'}
-                  class={'rounded-lg'}
+                  aspectRatio={"1:1"}
+                  class={"rounded-lg"}
+                  format="webp"
                 />
               )}
             </div>
@@ -89,18 +90,18 @@ const characters = data.results
       }
     </ul>
     <a
-      href={page === '1' ? '/characters/1' : `/characters/${+(page || 2) - 1}`}
+      href={p === "1" ? "/characters/1" : `/characters/${+(p || 2) - 1}`}
       class={`fixed top-[50vh] left-3 font-mono p-2 ${
-        page === '1' ? 'hidden' : ''
+        p === "1" ? "hidden" : ""
       }`}>Prev</a
     >
     <a
-      href={page === totalPage.toString()
+      href={p === totalPage.toString()
         ? `/characters/${totalPage}`
-        : `/characters/${+(page || 0) + 1}`}
+        : `/characters/${+(p || 0) + 1}`}
       class=`fixed top-[50vh] right-3 font-mono p-2
       ${
-        page === totalPage.toString() ? 'hidden' : ''
+        p === totalPage.toString() ? 'hidden' : ''
       }
       `
       >Next</a
