@@ -1,4 +1,5 @@
 ---
+import { getImage } from "@astrojs/image";
 import TitanShowCase from "../components/TitansShowCase";
 import Layout from "../layouts/Layout.astro";
 import type { GetTitansResponse } from "../types";
@@ -6,6 +7,17 @@ import type { GetTitansResponse } from "../types";
 const response = await fetch("https://api.attackontitanapi.com/titans?page=1");
 const data = (await response.json()) as GetTitansResponse;
 const titans = data.results;
+const titanImgs = await Promise.all([
+  ...titans.map(
+    async (titan) =>
+      await getImage({
+        src: titan.img,
+        alt: titan.name,
+        width: 640,
+        height: 640,
+      })
+  ),
+]);
 ---
 
 <Layout title="Welcome to Astro.">
@@ -13,6 +25,19 @@ const titans = data.results;
     class="p-20 flex flex-col gap-10 bg-gradient-to-r from-violet-100 to-fuchsia-100 relative min-h-screen"
   >
     <h1 class="text-center text-[3rem] font-mono">Titan Info</h1>
-    <TitanShowCase client:only="react" titans={titans} />
+    <TitanShowCase
+      client:only="react"
+      titans={titans}
+      titanImgUrlMap={titanImgs.reduce<
+        Record<GetTitansResponse["results"][number]["name"], string>
+      >(
+        (res, titanImg, ind) => ({
+          ...res,
+          [titans[ind].name as GetTitansResponse["results"][number]["name"]]:
+            titanImg.src || "",
+        }),
+        {}
+      )}
+    />
   </main>
 </Layout>

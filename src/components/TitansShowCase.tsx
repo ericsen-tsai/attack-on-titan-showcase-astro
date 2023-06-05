@@ -1,10 +1,17 @@
 import { Fragment, useState } from "react";
 import type { GetTitansResponse } from "../types";
 
-function TitansShowCase({ titans }: { titans: GetTitansResponse["results"] }) {
+function TitansShowCase({
+  titans,
+  titanImgUrlMap,
+}: {
+  titans: GetTitansResponse["results"];
+  titanImgUrlMap: Record<GetTitansResponse["results"][number]["name"], string>;
+}) {
   const [titan, setTitan] = useState<GetTitansResponse["results"][number]>(
     titans[0]
   );
+  const [isImgLoading, setIsImgLoading] = useState<boolean>(false);
 
   return (
     <div className="flex font-mono text-xl justify-center gap-10">
@@ -15,12 +22,25 @@ function TitansShowCase({ titans }: { titans: GetTitansResponse["results"] }) {
             className={`hover:text-pink-500 transition-all ${
               t.name === titan.name ? "text-pink-500" : ""
             }`}
-            onClick={() => setTitan(titans[ind])}
+            onClick={() => {
+              setTitan(titans[ind]);
+              if (titan.name !== titans[ind].name) {
+                setIsImgLoading(true);
+              }
+            }}
           >
             {t.name}
           </button>
         ))}
       </div>
+      <img
+        src={titanImgUrlMap[titan.name]}
+        alt={titan.name}
+        className={`h-[25rem] w-[25rem] rounded-lg ${
+          isImgLoading ? "blur-sm" : ""
+        }`}
+        onLoad={() => setIsImgLoading(false)}
+      />
       <div className="flex flex-col gap-3 w-[25rem]">
         <p className="font-bold uppercase">
           abilities:
